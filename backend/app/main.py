@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
-from .config import settings
-from .routers import (
+from app.config import settings
+from app.routers import (
     auth_router,
     subcontractors_router,
     contracts_router,
@@ -10,10 +10,10 @@ from .routers import (
     settlements_router,
     payments_router
 )
-from .middlewares.error_handler import error_handler_middleware
-from .middlewares.logging import logging_middleware
-from .middlewares.security import security_middleware
-from .tasks import setup_scheduler
+from app.middlewares.error_handler import error_handler_middleware
+from app.middlewares.logging import logging_middleware
+from app.middlewares.security import security_middleware
+from app.tasks import setup_scheduler
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

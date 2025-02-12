@@ -3,9 +3,14 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 
-from app.config import settings
-from app.database import Base
-from app.models import user  # 导入所有模型
+import sys
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
+
+from backend.app.config import settings
+from backend.app.database import Base
+from backend.app.models import user  # 导入所有模型
 
 config = context.config
 
@@ -15,7 +20,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 def get_url():
-    return settings.DATABASE_URL
+    return "sqlite:///subcontractor.db"
 
 def run_migrations_offline() -> None:
     url = get_url()

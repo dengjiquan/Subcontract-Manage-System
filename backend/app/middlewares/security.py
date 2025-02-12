@@ -3,23 +3,22 @@ from ..config import settings
 from ..utils.logger import logger
 
 async def security_middleware(request: Request, call_next):
-    # 检查请求头
-    if settings.ENVIRONMENT == "production":
-        # 检查必要的安全头
-        if "X-Content-Type-Options" not in request.headers:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Missing security headers"
-            )
-    
     # 添加安全响应头
     response = await call_next(request)
     
+    # 始终添加基本的安全响应头
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    
+    # 在生产环境下添加更严格的安全头
+    if getattr(settings, "ENVIRONMENT", "development") == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Content-Security-Policy"] = "default-src 'self'"
+        
+        # 检查必要的安全头
+        if "X-Content-Type-Options" not in request.headers:
+            logger.warning(f"Missing security headers in production environment: {request.url}")
     
     return response
 

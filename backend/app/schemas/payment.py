@@ -1,34 +1,39 @@
-from datetime import datetime, date
+from datetime import date
 from typing import Optional
+from pydantic import BaseModel, Field
 from decimal import Decimal
-from pydantic import BaseModel, constr, FilePath
 
 # 付款共享属性
 class PaymentBase(BaseModel):
+    contract_id: int
+    amount: Decimal
     payment_date: date
-    payment_amount: Decimal
-    payment_method: constr(regex='^(cash|bank_transfer|check)$')
-    remarks: Optional[str] = None
+    payment_method: str = Field(..., pattern='^(cash|bank_transfer|check)$')
+    description: Optional[str] = None
+    reference_number: Optional[str] = None
 
 # 付款创建
 class PaymentCreate(PaymentBase):
-    settlement_id: int
+    pass
 
 # 付款更新
-class PaymentUpdate(BaseModel):
+class PaymentUpdate(PaymentBase):
+    contract_id: Optional[int] = None
+    amount: Optional[Decimal] = None
     payment_date: Optional[date] = None
-    payment_amount: Optional[Decimal] = None
-    payment_method: Optional[constr(regex='^(cash|bank_transfer|check)$')] = None
-    remarks: Optional[str] = None
+    payment_method: Optional[str] = Field(None, pattern='^(cash|bank_transfer|check)$')
 
 # 付款数据库模型
 class PaymentInDB(PaymentBase):
     id: int
-    settlement_id: int
-    created_at: datetime
+    created_at: date
+    updated_at: date
 
     class Config:
         from_attributes = True
+
+class Payment(PaymentInDB):
+    pass
 
 # 合同文件共享属性
 class ContractFileBase(BaseModel):
@@ -43,7 +48,7 @@ class ContractFileCreate(ContractFileBase):
 class ContractFileInDB(ContractFileBase):
     id: int
     contract_id: int
-    upload_date: datetime
+    upload_date: date
 
     class Config:
         from_attributes = True 
